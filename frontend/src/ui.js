@@ -1,17 +1,23 @@
 // ui.js
-// Displays the drag-and-drop UI
 // --------------------------------------------------
 
 import { useState, useRef, useCallback } from 'react';
 import ReactFlow, { Controls, Background, MiniMap } from 'reactflow';
 import { useStore } from './store';
 import { shallow } from 'zustand/shallow';
-import { InputNode } from './nodes/inputNode';
-import { LLMNode } from './nodes/llmNode';
-import { OutputNode } from './nodes/outputNode';
-import { TextNode } from './nodes/textNode';
+import { InputNode } from './nodes/OldNodes/inputNode';
+import { LLMNode } from './nodes/OldNodes/llmNode';
+import { OutputNode } from './nodes/OldNodes/outputNode';
+import { TextNode } from './nodes/OldNodes/textNode';
+import { ApiNode } from './nodes/NewNodes/ApiNode';
+import {ConditionNode} from './nodes/NewNodes/ConditionNode';
+import { DatabaseNode } from './nodes/NewNodes/DatabaseNode';
+import { TransformNode } from './nodes/NewNodes/TransformNode';
+import { PromptNode } from './nodes/NewNodes/TextToPromptNode';
+
 
 import 'reactflow/dist/style.css';
+import { PipelineToolbar } from './toolbar';
 
 const gridSize = 20;
 const proOptions = { hideAttribution: true };
@@ -20,6 +26,11 @@ const nodeTypes = {
   llm: LLMNode,
   customOutput: OutputNode,
   text: TextNode,
+  api: ApiNode,
+  condition: ConditionNode,
+  database: DatabaseNode,
+  cleaner: TransformNode,
+  prompt: PromptNode,
 };
 
 const selector = (state) => ({
@@ -89,27 +100,33 @@ export const PipelineUI = () => {
     }, []);
 
     return (
-        <>
-        <div ref={reactFlowWrapper} style={{width: '100wv', height: '70vh'}}>
-            <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onConnect={onConnect}
-                onDrop={onDrop}
-                onDragOver={onDragOver}
-                onInit={setReactFlowInstance}
-                nodeTypes={nodeTypes}
-                proOptions={proOptions}
-                snapGrid={[gridSize, gridSize]}
-                connectionLineType='smoothstep'
-            >
-                <Background color="#aaa" gap={gridSize} />
-                <Controls />
-                <MiniMap />
-            </ReactFlow>
+        <div className="pipeline-container">
+          <div className="pipeline-content">
+            {/* Left Sidebar */}
+            <PipelineToolbar />
+
+            {/* Main Canvas */}
+            <div ref={reactFlowWrapper} className="react-flow-canvas">
+                <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onConnect={onConnect}
+                    onDrop={onDrop}
+                    onDragOver={onDragOver}
+                    onInit={setReactFlowInstance}
+                    nodeTypes={nodeTypes}
+                    proOptions={proOptions}
+                    snapGrid={[gridSize, gridSize]}
+                    connectionLineType='smoothstep'
+                >
+                    <Background color="#aaa" gap={gridSize} />
+                    <Controls position="top-left" />
+                    <MiniMap />
+                </ReactFlow>
+            </div>
+          </div>
         </div>
-        </>
     )
 }
