@@ -1,5 +1,27 @@
 import { BaseNode } from "../BaseNode";
 
+const JS_KEYWORDS = new Set([
+  "break","case","catch","class","const","continue","debugger","default",
+  "delete","do","else","export","extends","finally","for","function",
+  "if","import","in","instanceof","new","return","super","switch",
+  "this","throw","try","typeof","var","void","while","with","yield",
+  "let","static","enum","await","implements","package","protected",
+  "interface","private","public"
+]);
+
+const getValidVariables = (text = "") => {
+  const matches = [...text.matchAll(/\{\{\s*([^{}]+?)\s*\}\}/g)];
+  // checks for valid values and pushes them here
+  return matches
+    .map(match => match[1].trim())// add portion
+    .filter(variable => {
+      const isValidIdentifier = // validity portion
+        /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(variable);
+
+      return isValidIdentifier && !JS_KEYWORDS.has(variable);
+    });
+};
+
 export const TextNode = ({ id, data }) => {
   return (
     <BaseNode
@@ -8,18 +30,17 @@ export const TextNode = ({ id, data }) => {
       nodeType="text"
       textAreaConfig={{
         label: "Text:",
-        defaultValue:
-          data?.text || "{{input}}",
+        defaultValue: data?.text || "{{input}}",
+      }}
+      sidebarConfig={{
+        title: "Variables",
+        extractor: getValidVariables,
       }}
       inputs={[
-        {
-          id: "input",
-        },
+        { id: "input" },
       ]}
       outputs={[
-        {
-          id: "output",
-        },
+        { id: "output" },
       ]}
       styles={{
         container: {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import {Handle, useReactFlow ,Position} from "reactflow";
+import { Handle, useReactFlow, Position } from "reactflow";
 import '../index.css';
 
 export const BaseNode = ({
@@ -8,6 +8,7 @@ export const BaseNode = ({
     nameConfig,
     selectConfig,
     textAreaConfig,
+    sidebarConfig, // For Variables
     inputs = [],
     outputs = [],
     children,
@@ -53,10 +54,35 @@ export const BaseNode = ({
             background: "#fff",
             boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
         },
+        sidebar: {
+            marginTop: 10,
+            width: 100,
+            borderLeft: "1px solid #e5e5e5",
+            paddingLeft: 10,
+            marginLeft: 10,
+        },
+
+        sidebarTitle: {
+            fontSize: 11,
+            fontWeight: 700,
+            marginBottom: 8,
+            textTransform: "uppercase",
+            fontFamily: "'Courier New', monospace",
+            letterSpacing: "0.4px",
+        },
+
+        sidebarItem: {
+            padding: "4px 8px",
+            marginBottom: 4,
+            borderRadius: 6,
+            background: "#f5f5f5",
+            fontSize: 11,
+            fontFamily: "'Courier New', monospace",
+            wordBreak: "break-word",
+        },
 
         title: {
             fontWeight: "700",
-            marginBottom: 12,
             fontSize: 14,
             textTransform: "uppercase",
             letterSpacing: "0.5px",
@@ -71,6 +97,7 @@ export const BaseNode = ({
             fontWeight: 600,
             textTransform: "uppercase",
             letterSpacing: "0.3px",
+            fontFamily:"'Courier New', monospace",
             marginBottom: 4,
         },
 
@@ -107,8 +134,13 @@ export const BaseNode = ({
             fontSize: 12,
             fontFamily: "'Courier New', monospace",
             backgroundColor: "#f8f9fa",
+            borderLeft: "1px solid #e5e5e5",
+            overflow: "hidden",  // hides scrollbar
         },
     };
+
+    //sidebar added
+    const sidebarItems = sidebarConfig?.extractor ? sidebarConfig.extractor(text) : sidebarConfig?.items || [];
 
     return (
         <div
@@ -209,26 +241,84 @@ export const BaseNode = ({
             )}
 
             {textAreaConfig && (
-                <label
+                <div
                     style={{
-                        ...defaultStyles.label,
-                        ...styles.label,
-                        transition: "color 0.2s ease",
-                        color: "#333",
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 10,
                     }}
                 >
-                    {textAreaConfig.label}
+                    <div style={{ flex: 1 }}>
+                        <label
+                            style={{
+                                ...defaultStyles.label,
+                                ...styles.label,
+                                color: "#333",
+                            }}
+                        >
+                            {textAreaConfig.label}
 
-                    <textarea
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                        style={{
-                            ...defaultStyles.textarea,
-                            ...styles.textarea,
-                            transition: "all 0.2s ease",
-                        }}
-                    />
-                </label>
+                            <textarea
+                                value={text}
+                                onChange={(e) => {
+                                    e.target.style.height = "auto";
+                                    e.target.style.height = `${e.target.scrollHeight}px`;
+
+                                    setText(e.target.value);
+
+                                    textAreaConfig.onChange?.(
+                                        e.target.value
+                                    );
+                                }}
+                                style={{
+                                    ...defaultStyles.textarea,
+                                    ...styles.textarea,
+                                }}
+                            />
+                        </label>
+                    </div>
+
+                    {sidebarConfig && (
+                        <div
+                            style={{
+                                ...defaultStyles.sidebar,
+                                ...styles.sidebar,
+                            }}
+                        >
+                            <div
+                                style={{
+                                    ...defaultStyles.sidebarTitle,
+                                    ...styles.sidebarTitle,
+                                }}
+                            >
+                                {sidebarConfig.title}
+                            </div>
+
+                            {sidebarItems.length > 0 ? (
+                                sidebarItems.map((item) => (
+                                    <div
+                                        key={item}
+                                        style={{
+                                            ...defaultStyles.sidebarItem,
+                                            ...styles.sidebarItem,
+                                        }}
+                                    >
+                                        {item}
+                                    </div>
+                                ))
+                            ) : (
+                                <div
+                                    style={{
+                                        fontSize: 11,
+                                        opacity: 0.6,
+                                    }}
+                                >
+                                    None
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
             )}
 
             {children}
